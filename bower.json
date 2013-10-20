@@ -1,0 +1,11 @@
+{
+  "name": "angular-webspeech-directive",
+  "version": "0.0.1",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "angular-unstable": "latest",
+    "angular-mocks": "latest",
+    "jquery": "latest"
+  }
+}
