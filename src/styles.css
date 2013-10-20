@@ -1,15 +1,15 @@
 /* Put your css in here */
 
-.speech-container {
+.jsSpeechFactory-container {
   position:relative;
 }
 
-.speech-hint {
+.jsSpeechFactory-hint {
   display:block;
   white-space:nowrap;
   overflow:hidden;
 }
-.speech-btn{
+.jsSpeechFactory-btn{
   display: block;
   position: absolute;
   right: 0;

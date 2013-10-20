@@ -3,6 +3,7 @@
 
 module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-coffee');
+	grunt.loadNpmTasks('grunt-contrib-copy');
   // Configurable paths
   var yoConfig = {
     livereload: 35729,
@@ -95,6 +96,13 @@ module.exports = function(grunt) {
         }
       }
     },
+		copy: {
+		  main: {
+		    files: [
+		      {src: ['<%= yo.src %>/*.gif'], dest: '<%= yo.dist %>', filter: 'isFile'}
+		    ]
+		  }
+		},
     less: {
       options: {
         // dumpLineNumbers: 'all',
@@ -191,7 +199,8 @@ module.exports = function(grunt) {
     'clean:dist',
     'less:dist',
 		'coffee',
-		//'concat',
+		//'copy',
+		'concat',
 		'uglify',
     'ngmin:dist',
     'uglify:dist'

@@ -1,8 +1,118 @@
 'use strict'
+
+
+
+#Speech Class -  
+#Holds methods for creating a speech instance, starting and stopping and returning the results
+class Speech 
+	
+	icons =
+		start: 'mic.gif'
+		recording: 'mic-animate.gif'
+		blocked: 'mic-slash.gif'
+	
+	messages =
+		info_speak_now: 'Speak now.'
+		info_stop: 'Proccessing your voice...'
+		info_no_speech: 'No Speech was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>.'
+		info_no_mic: 'No microphone was found. Ensure that a microphone is installed and that'
+		info_blocked: 'Permission to use microphone is blocked. To change, go to chrome://settings/contentExceptions#media-stream'
+		info_denied: 'Permission to use microphone was denied.'
+		info_setup: 'Click on the microphone icon to activate voice recognition.'
+		info_upgrade: 'Web jsSpeechFactory API is not supported by this browser. Upgrade to <a href="//www.google.com/chrome">Chrome</a> version 25 or later.'
+		info_allow: 'Click the "Allow" button above to enable your microphone.'	
+	
+	recording = false
+	recognition = null
+	
+	#Handle initializing
+	constructor: () ->
+		@setMsg('info_setup')
+		@supported = @checkBrowser()
+		console.log this
+	
+	start: () ->
+		@enable()
+		recording = true
+		recognition.start()
+	
+	stop: () ->
+		recording = false
+		recognition.stop()
+	
+	checkBrowser: () ->
+		'webkitSpeechRecognition' of window
+	
+	setMsg: (key) ->
+		if messages[key]
+			@message = messages[key] 
+		else 
+			@message = key
+		
+		console.log(key, @message);
+	
+	#Handle prompting user to enable voice record
+	enable: () ->
+		#Get the instance
+		recognition = new webkitSpeechRecognition()
+		#Continuous listening
+		recognition.continuous = true
+		recognition.interimResults = true
+		#Setup event handlers
+		recognition.onstart = @onstart
+		recognition.onerror = @onerror
+		recognition.onend = @onend
+		recognition.onresult = @onresult
+	
+	onstart: (event) ->
+		console.log(event)
+	
+	onend: (event) ->
+		console.log(event)
+	
+	onresult: (event) ->
+		trans = ''
+		if typeof (event.results) is 'undefined'
+			recognition.onend = null
+			recognition.stop()
+			return
+		i = event.resultIndex
+		while i < event.results.length
+			trans += event.results[i][0].transcript
+			console.log(trans)
+			++i
+		Speech.message = trans
+	
+	
+	onerror: (event) ->
+		console.log(event)
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Set on window
+window.Speech = new Speech
+
+#Module instance
 _app = angular.module('jonniespratley.angularWebSpeechDirective', [])
 
-_app.factory 'jsSpeechFactory', (['$rootScope', ($rootScope) -> 
-	window.jsSpeechFactory = jsSpeechFactory = 
+#Directive Factory
+_app.service 'jsSpeechFactory', (['$rootScope', ($rootScope) -> 
+	
+	jsSpeechFactory = 
 		startTimestamp: null
 		recognizing: false
 		recording: false
@@ -10,12 +120,13 @@ _app.factory 'jsSpeechFactory', (['$rootScope', ($rootScope) ->
 		ignoreEnd: null
 		transcript: null
 		messages:
-			info_recording: 'Speak now.'
-			info_no_jsSpeechFactory: 'No jsSpeechFactory was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>.'
+			info_speak_now: 'Speak now.'
+			info_stop: 'Proccessing your voice...'
+			info_no_speech: 'No Speech was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>.'
 			info_no_mic: 'No microphone was found. Ensure that a microphone is installed and that'
 			info_blocked: 'Permission to use microphone is blocked. To change, go to chrome://settings/contentExceptions#media-stream'
 			info_denied: 'Permission to use microphone was denied.'
-			info_start: 'Click on the microphone icon and begin speaking for as long as you like.'
+			info_setup: 'Click on the microphone icon to activate voice recognition.'
 			info_upgrade: 'Web jsSpeechFactory API is not supported by this browser. Upgrade to <a href="//www.google.com/chrome">Chrome</a> version 25 or later.'
 			info_allow: 'Click the "Allow" button above to enable your microphone.'
 		
@@ -26,46 +137,60 @@ _app.factory 'jsSpeechFactory', (['$rootScope', ($rootScope) ->
 			results: null
 		
 		elements:
-			icon: angular.element('.jsSpeechFactory-icon')
-			btn: angular.element('.jsSpeechFactory-btn')
-			container: angular.element('.jsSpeechFactory-container')
-			hint: angular.element('.jsSpeechFactory-hint')
-			status: angular.element('.jsSpeechFactory-status')
-			message: angular.element('.jsSpeechFactory-message')
+			icon: '.jsSpeechFactory-icon'
+			btn: '.jsSpeechFactory-btn'
+			container: '.jsSpeechFactory-container'
+			hint: '.jsSpeechFactory-hint'
+			status: '.jsSpeechFactory-status'
+			message: '.jsSpeechFactory-message'
 		
 		icons:
-			start: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic.gif'
-			recording: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic-animate.gif'
-			blocked: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic-slash.gif'
+			start: 'mic.gif'
+			recording: 'mic-animate.gif'
+			blocked: 'mic-slash.gif'
 		
-		init: (scope)->
-			@scope = scope
-			@log 'jsSpeechFactory.init()', this
+		init: (options)->
+			@options = options
+			@scope = options.scope
+			console.log 'jsSpeechFactory.init()', this
+
 			if 'webkitSpeechRecognition' of window
 				@setup()
 			else
 				@showUpgrade()
 
-			#Setup UI
-			@model.message = @messages.info_start
-			@changeIcon('start')
-			scope.Speech = this
+			$rootScope.Speech = this
+			this
+		
+		#showButtons('inline-block');
+		showInfo: (message) ->
+			console.log 'jsSpeechFactory.showInfo()', this
+			@model.message = @messages[message]
+			console.log(message)
+			#alert(@messages[message])
+			
 		
 
 		showUpgrade: ->
-			@log 'jsSpeechFactory.showUpgrade()', this
+			console.log 'jsSpeechFactory.showUpgrade()', this
 		
+
 		#Handle setting up everything.
 		setup: ->
-			@log 'jsSpeechFactory.setup()', this
-
+			console.log 'jsSpeechFactory.setup()', this
+			
+			#Setup UI
+			@showInfo 'info_setup'
+			@model.icon = @icons.start
+			
 			#Get the instance
 			@recognition = new webkitSpeechRecognition()
 
 			#Continuous listening
 			@recognition.continuous = true
 			@recognition.interimResults = true
-			@changeIcon('blocked')
+
+
 
 			#Setup event handlers
 			@recognition.onstart = @onstart
@@ -73,47 +198,62 @@ _app.factory 'jsSpeechFactory', (['$rootScope', ($rootScope) ->
 			@recognition.onend = @onend
 			@recognition.onresult = @onresult
 		
+
 		#Handle starting
 		start: ->
-			@log 'jsSpeechFactory.start()'
-			@showInfo 'info_recording'
-			@recognizing = true
-			#@model.icon = @icons.recording
-			@startTimestamp = new Date()
+			console.log 'jsSpeechFactory.start()'
+			@showInfo 'info_allow'
+			@changeIcon 'blocked'
+			@recognition.stop()
 			@recognition.start()
 		
+
 		#Handle starting or stopping.
 		toggle: -> 
 			if @recognizing
-				jsSpeechFactory.stop()
+				@stop()
 			else
-				jsSpeechFactory.start()
+				@start()
 		
-	
-		changeIcon: (what) ->
-			@model.icon = @icons[what]
-		
+
 		#Handle stopping
 		stop: ->
-			@log 'jsSpeechFactory.stop()'
+			console.log 'jsSpeechFactory.stop()'
+			@recognizing = false
 			@recognition.stop()
-			@model.message = 'Stopped'
-			@showInfo 'info_start'
+			@changeIcon 'start'
+			@showInfo 'info_stop'
 		
+
+		capitalize: (s) ->
+			@log s
+			s
+		
+		changeIcon: (icon) ->
+			jsSpeechFactory.model.icon = jsSpeechFactory.icons[icon]
+		
+	
+
+		showResults: (s) ->
+			alert(s)
+		
+		log: =>
+			console.log arguments
+	
+		#Handle the onstart event, this event fires when the recording starts.
 		onstart: (event) ->
-			jsSpeechFactory.log 'jsSpeechFactory.onstart()', event
+			console.log 'jsSpeechFactory.onstart()', event
 
 			#Listening
 			jsSpeechFactory.recognizing = true
+			jsSpeechFactory.startTimestamp = new Date()
 
 			#Show message
 			jsSpeechFactory.showInfo 'info_speak_now'
-
-			#Change icon
-			jsSpeechFactory.changeIcon('recording')
+			jsSpeechFactory.changeIcon 'recording'
 		
-
-		onerror: (event) ->
+		#Handle the onerror event
+		onerror: (event, msg) ->
 			console.log 'jsSpeechFactory.onerror()', event
 
 			if event.error is 'no-speech'
@@ -134,24 +274,28 @@ _app.factory 'jsSpeechFactory', (['$rootScope', ($rootScope) ->
 				jsSpeechFactory.ignoreEnd = true
 		
 
-		onend: ->
-			console.log 'jsSpeechFactory.onend()'
+		onend: (event)->
+			jsSpeechFactory.options.onend(event)
+			console.log 'jsSpeechFactory.onend()', event
 			jsSpeechFactory.recognizing = false
+
 			if jsSpeechFactory.ignoreEnd
 			  return
 
 			#Change icon
-			jsSpeechFactory.model.icon = jsSpeechFactory.icons.start
+			jsSpeechFactory.changeIcon 'start'
 			unless jsSpeechFactory.transcript
 				jsSpeechFactory.showInfo 'info_start'
 				return
 			jsSpeechFactory.showInfo ''
 		
 
+
 		onresult: (event) ->
-			jsSpeechFactory.log 'jsSpeechFactory.onresult()', event
+			console.log 'jsSpeechFactory.onresult()', event
+
 			jsSpeechFactory.recognizing = false
-			interim_transcript = ''
+			trans = ''
 			if typeof (event.results) is 'undefined'
 				@recognition.onend = null
 				@recognition.stop()
@@ -160,54 +304,124 @@ _app.factory 'jsSpeechFactory', (['$rootScope', ($rootScope) ->
 			i = event.resultIndex
 
 			while i < event.results.length
-				trans = event.results[i][0].transcript
-				
-				jsSpeechFactory.model.result += trans
-				
-				
-				#log
-				console.log(trans)
-				
-				
-				if event.results[i].isFinal
-					jsSpeechFactory.transcript += event.results[i][0].transcript
-					jsSpeechFactory.stop()
-				else
-					jsSpeechFactory.transcript += event.results[i][0].transcript
+				trans += event.results[i][0].transcript
+				console.log(trans, event.results[i][0])
+				jsSpeechFactory.options.onresult(trans)
 				++i
+			jsSpeechFactory.showResults trans
 			jsSpeechFactory.transcript = jsSpeechFactory.capitalize(jsSpeechFactory.transcript)
-			
-		
-
-		#showButtons('inline-block');
-		showInfo: (message) ->
-			jsSpeechFactory.log 'jsSpeechFactory.showInfo()', this
-			@message = @messages[message]
-			
-		
-		capitalize: (s) ->
-			@log s
 		
 	
-		linebreak: (s) ->
-			@log s
-		
-		log: =>
-			console.log arguments
-	
+	window.jsSpeechFactory = jsSpeechFactory
 ])
 
 _app.directive 'jsSpeech', (['jsSpeechFactory', (jsSpeechFactory)->
-	restrict: 'EAC'
-	scope: true
-	replace:true
-	transclude: true
-	templateUrl: '../src/tmpl.html'
-	link: (scope, lElement, lAttrs, transclude) ->
-		scope.Speech = jsSpeechFactory.init(scope)
-		
-		#scope.Speech.start = jsSpeechFactory.start();
-		
-		console.log 'jsSpeechFactory', jsSpeechFactory, scope
-	
+  restrict: 'EAC'
+  scope: true
+  replace:true
+  transclude: true
+  template: '<div class="jsSpeechFactory-container"><p ng-bind-html-unsafe="msg"></p><a id="button" class="jsSpeechFactory-btn" ng-click="toggleStartStop()"><img ng-src="{{Speech.icon}}" class="jsSpeechFactory-icon"/></a><textarea id="textarea" rows="4" class="form-control" ng-model="myModel"></textarea></div>'
+  require: 'ngModel'
+  link: (scope, lElement, lAttrs, ngModel) ->
+    $scope = scope
+    recognizing = false
+    recognition = new webkitSpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+  
+    $scope.messages =
+      info_speak_now: 'Speak now.'
+      info_stop: 'Proccessing your voice...'
+      info_no_speech: 'No Speech was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>.'
+      info_no_mic: 'No microphone was found. Ensure that a microphone is installed and that'
+      info_blocked: 'Permission to use microphone is blocked. To change, go to <a href="chrome://settings/contentExceptions#media-stream">chrome://settings/contentExceptions#media-stream</a>.'
+      info_denied: 'Permission to use microphone was denied.'
+      info_setup: 'Click on the microphone icon to enable Web Speech.'
+      info_upgrade: 'Web jsSpeechFactory API is not supported by this browser. Upgrade to <a href="//www.google.com/chrome">Chrome</a> version 25 or later.'
+      info_allow: 'Click the "Allow" button above to enable your microphone.'	
+  
+    icons =
+      start: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic.png'
+      recording: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic2-animate.gif'
+      blocked: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic-slash.png'
+      
+      
+    $scope.myModel = ""
+    $scope.msg = $scope.messages.info_setup
+    $scope.Speech = 
+      icon: icons.start
+    
+    #Handle start
+    $scope.onstart = (event) ->
+      $scope.$apply(() ->
+        $scope.Speech.icon = icons.recording                  
+      )
+      console.log 'onstart', event
+      
+  
+    #Handle error
+    $scope.onerror = (event, message) ->
+      console.log 'onerror', event, message
+      switch event.error
+        when "not-allowed"
+          $scope.$apply(() ->
+            $scope.msg = $scope.messages.info_blocked
+          )
+          
+        else
+          console.log event
+      
+    #Handle results
+    $scope.onresult = (event) ->
+      resultIndex = event.resultIndex
+      console.log 'Handle results', event
+      
+      $scope.$apply(() ->
+        $scope.Speech.icon = icons.recording                  
+        $scope.msg = 'Speak into the mic...'
+      )
+      
+      
+      i = resultIndex
+      while i < event.results.length
+        result = event.results[i][0]
+        trans = result.transcript
+        console.log event.results[i]
+        $scope.myModel = trans
+        if event.results[i].isFinal
+          console.log trans
+          $scope.myModel = trans
+         ++i
+      
+    
+    #If its the file, set on the model
+    $scope.reset = (event) ->
+      console.log 'reset', event
+      recognizing = false
+      $scope.Speech.icon = icons.start
+      $scope.msg = $scope.messages.info_setup
+      
+      #button.innerHTML = "Click to Speak"
+    
+  
+    #Handle toggling
+    $scope.toggleStartStop = ->
+      if recognizing
+        recognition.stop()
+        $scope.reset()
+      else
+        recognition.start()
+        recognizing = true
+        $scope.myModel = ""
+        $scope.Speech.icon = icons.blocked
+        #button.innerHTML = "Click to Stop"
+  
+    $scope.reset()
+    
+    #Attach event listeners
+    recognition.onerror = $scope.onerror
+    recognition.onend = $scope.reset
+    recognition.onresult = $scope.onresult
+    recognition.onstart = $scope.onstart
+    console.log(scope)
 ])
