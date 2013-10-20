@@ -19,6 +19,8 @@ In your web page:
 ## Documentation
 _(Coming soon)_
 
+https://dvcs.w3.org/hg/speech-api/raw-file/tip/speechapi.html
+
 ## Examples
 _(Coming soon)_
 

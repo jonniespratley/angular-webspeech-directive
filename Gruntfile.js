@@ -2,7 +2,7 @@
 'use strict';
 
 module.exports = function(grunt) {
-
+	grunt.loadNpmTasks('grunt-contrib-coffee');
   // Configurable paths
   var yoConfig = {
     livereload: 35729,
@@ -163,20 +163,31 @@ module.exports = function(grunt) {
         banner: '<%= meta.banner %>'
       },
       dist: {
-        src: '<%= concat.dist.dest %>',
+        src: '<%= yo.src %>/<%= pkg.name %>.js',
         dest: '<%= yo.dist %>/<%= pkg.name %>.min.js'
       }
-    }
+    },
+		coffee: {
+		  compile: {
+		    files: {
+		      '<%= yo.src %>/<%= pkg.name %>.js': '<%= yo.src %>/<%= pkg.name %>.coffee'
+		    }
+		  }
+		}
   });
 
   grunt.registerTask('test', [
-    'jshint',
+    //'jshint',
+		'coffee',
     'karma:unit'
   ]);
 
   grunt.registerTask('build', [
     'clean:dist',
     'less:dist',
+		'coffee',
+		//'concat',
+		'uglify',
     'ngmin:dist',
     'uglify:dist'
   ]);

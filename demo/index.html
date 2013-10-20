@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html ng-app="plunker">
+
+  <head>
+    <meta charset="utf-8" />
+    <title>AngularJS Plunker</title>
+    <link data-require="bootstrap-css@3.0.0" data-semver="3.0.0" rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
+    <script>document.write('<base href="' + document.location + '" />');</script>
+    <link rel="stylesheet" href="style.css" />
+    
+    <script data-require="jquery@2.0.3" data-semver="2.0.3" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script data-require="angular.js@1.0.x" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js" data-semver="1.0.8"></script>
+    <script src="Speech.js"></script>
+    <script src="app.js"></script>
+  </head>
+
+  <body ng-controller="MainCtrl" ng-cloak>
+    <div class="navbar navbar-inverse navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">angular-webspeech-directive</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active">
+              <a href="#">Home</a>
+            </li>
+            
+          </ul>
+        </div>
+        <!--/.nav-collapse -->
+      </div>
+    </div>
+    <div class="container">
+      <div class="starter-template jumbotron">
+        <h1>{{home.title}}</h1>
+        <p class="lead">{{home.body}}</p>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="speech-container">
+            <a href="" ng-click="Speech.start();" class="speech-btn">
+              <img class="speech-icon" src="http://placehold.it/50" ng-src="{{Speech.model.icon}}" alt="Mic Status" />
+            </a>
+            <p class="speech-hint">
+              <strong class="speech-status">Recording: {{Speech.recognizing}}</strong>
+              <span class="speech-message">{{Speech.model.message}}</span>
+            </p>
+            <textarea class="form-control" rows="4" ng-model="Speech.transcript"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>

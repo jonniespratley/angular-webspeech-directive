@@ -1,0 +1,17 @@
+/* Put your css in here */
+
+.speech-container {
+  position:relative;
+}
+
+.speech-hint {
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+}
+.speech-btn{
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 25px;
+}

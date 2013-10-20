@@ -1,13 +1,12 @@
-(function() {
+(function () {
   'use strict';
   var checkSpeech;
-
-  angular.module('jonniespratley.angularWebspeechDirective', []).directive('myDirective', function() {
+  angular.module('jonniespratley.angularWebspeechDirective', []).directive('myDirective', function () {
     var compile;
     return {
       restrict: 'EAC',
       scope: true,
-      link: compile = function(tElement, tAttrs, transclude) {
+      link: compile = function (tElement, tAttrs, transclude) {
         var Speech;
         return Speech = {
           startTimestamp: null,
@@ -44,7 +43,7 @@
             recording: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic-animate.gif',
             blocked: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic-slash.gif'
           },
-          init: function() {
+          init: function () {
             this.log('Speech.init()', this);
             if ('webkitSpeechRecognition' in window) {
               this.setup();
@@ -55,13 +54,13 @@
             this.model.icon = this.icons.start;
             return this;
           },
-          onstart: function(event) {
+          onstart: function (event) {
             Speech.log('Speech.onstart()', event);
             Speech.recognizing = true;
             Speech.showInfo('info_speak_now');
             return Speech.model.icon = Speech.icons.recording;
           },
-          onerror: function(event) {
+          onerror: function (event) {
             Speech.log('Speech.onerror()', event);
             if (event.error === 'no-speech') {
               Speech.model.icon = Speech.icons.start;
@@ -82,7 +81,7 @@
               return Speech.ignoreEnd = true;
             }
           },
-          onend: function() {
+          onend: function () {
             Speech.log('Speech.onend()');
             Speech.recognizing = false;
             if (Speech.ignoreEnd) {
@@ -95,7 +94,7 @@
             }
             return Speech.showInfo('');
           },
-          onresult: function(event) {
+          onresult: function (event) {
             var i, interim_transcript;
             Speech.log('Speech.onresult()', event);
             interim_transcript = '';
@@ -117,14 +116,14 @@
             Speech.transcript = Speech.capitalize(Speech.transcript);
             return Speech.transcript || interim_transcript;
           },
-          showInfo: function(message) {
+          showInfo: function (message) {
             this.log('Speech.showInfo()', this);
             return this.model.message = this.messages[message];
           },
-          showUpgrade: function() {
+          showUpgrade: function () {
             return this.log('Speech.showUpgrade()', this);
           },
-          setup: function() {
+          setup: function () {
             this.log('Speech.setup()', this);
             this.recognition = new webkitSpeechRecognition();
             this.recognition.continuous = true;
@@ -134,7 +133,7 @@
             this.recognition.onend = this.onend;
             return this.recognition.onresult = this.onresult;
           },
-          start: function() {
+          start: function () {
             this.log('Speech.start()');
             if (this.recognizing) {
               this.recognition.stop();
@@ -143,20 +142,21 @@
             this.startTimestamp = new Date();
             return this.recognition.start();
           },
-          stop: function() {
+          stop: function () {
             return this.log('Speech.stop()');
           },
-          capitalize: function(str) {},
-          linebreak: function(s) {},
-          log: function() {
+          capitalize: function (str) {
+          },
+          linebreak: function (s) {
+          },
+          log: function () {
             return console.log(arguments);
           }
         };
       }
     };
   });
-
-  checkSpeech = function() {
+  checkSpeech = function () {
     if (typeof speechRecognition !== 'undefinded') {
       return new speechRecognition();
     } else if (typeof msSpeechRecognition !== 'undefined') {
@@ -169,5 +169,4 @@
       throw new Error('No speech recognition API detected!');
     }
   };
-
-}).call(this);
+}.call(this));
