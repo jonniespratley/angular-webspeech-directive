@@ -1,4 +1,4 @@
-var app = angular.module('plunker', []);
+var app = angular.module('plunker', ['jonniespratley.angularWebSpeechDirective']);
 
 var speechRecognition = function(){
   console.log('speechRecognition');
@@ -28,5 +28,5 @@ app.controller('MainCtrl', function($scope) {
   };
  
   
-  $scope.Speech = Speech.init();
+  //$scope.Speech = Speech.init();
 });

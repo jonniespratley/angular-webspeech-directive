@@ -59,6 +59,10 @@ module.exports = function(grunt) {
         files: ['<%= yo.src %>/{,*/}*.less'],
         tasks: ['less:dist']
       },
+			coffee: {
+				files: ['<%= yo.src %>/{,*/}*.coffee'],
+				tasks: ['build']
+			},
       app: {
         files: [
           '<%= yo.src %>/{,*/}*.html',
@@ -170,7 +174,8 @@ module.exports = function(grunt) {
 		coffee: {
 		  compile: {
 		    files: {
-		      '<%= yo.src %>/<%= pkg.name %>.js': '<%= yo.src %>/<%= pkg.name %>.coffee'
+		      '<%= yo.src %>/<%= pkg.name %>.js': '<%= yo.src %>/<%= pkg.name %>.coffee',
+					'<%= yo.dist %>/Speech.js': '<%= yo.src %>/Speech.coffee'
 		    }
 		  }
 		}

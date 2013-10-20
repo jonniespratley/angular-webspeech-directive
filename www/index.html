@@ -4,13 +4,12 @@
   <head>
     <meta charset="utf-8" />
     <title>AngularJS Plunker</title>
-    <link data-require="bootstrap-css@3.0.0" data-semver="3.0.0" rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
-    <script>document.write('<base href="' + document.location + '" />');</script>
-    <link rel="stylesheet" href="style.css" />
-    
-    <script data-require="jquery@2.0.3" data-semver="2.0.3" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-    <script data-require="angular.js@1.0.x" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js" data-semver="1.0.8"></script>
-    <script src="Speech.js"></script>
+    <link rel="stylesheet" href="bootstrap.min.css" />
+    <link rel="stylesheet" href="styles.css" />
+
+    <script src="../bower_components/jquery/jquery.min.js"></script>
+    <script src="../bower_components/angular/angular.min.js"></script>
+    <script src="../dist/angular-webspeech-directive.js"></script>
     <script src="app.js"></script>
   </head>
 
@@ -43,16 +42,7 @@
       </div>
       <div class="row">
         <div class="col-md-12">
-          <div class="speech-container">
-            <a href="" ng-click="Speech.start();" class="speech-btn">
-              <img class="speech-icon" src="http://placehold.it/50" ng-src="{{Speech.model.icon}}" alt="Mic Status" />
-            </a>
-            <p class="speech-hint">
-              <strong class="speech-status">Recording: {{Speech.recognizing}}</strong>
-              <span class="speech-message">{{Speech.model.message}}</span>
-            </p>
-            <textarea class="form-control" rows="4" ng-model="Speech.transcript"></textarea>
-          </div>
+          <js-speech></js-speech>
         </div>
       </div>
     </div>
