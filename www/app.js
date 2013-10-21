@@ -26,8 +26,6 @@ app.controller('MainCtrl', function($scope) {
     title: 'Web Speech API Directive',
     body: 'Use your voice to do something.'
   };
- 
-	$scope.Speech = Speech;
   //$scope.Speech = Speech.init();
 	$scope.myModel = '';
 	console.log($scope);

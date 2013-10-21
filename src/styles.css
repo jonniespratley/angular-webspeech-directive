@@ -12,6 +12,6 @@
 .jsSpeechFactory-btn{
   display: block;
   position: absolute;
-  right: 0;
-  top: 25px;
+  right: 5px;
+  top: 35%;
 }
