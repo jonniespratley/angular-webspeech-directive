@@ -6,7 +6,7 @@ Angular Directives are a way to teach HTML new tricks. During DOM compilation di
 The Web Speech API provides an alternative input method for web applications *(without using a keyboard)*. Developers can give web applications the ability to transcribe voice to text, from the computer's microphone. 
 
  
-![image](https://dl.dropboxusercontent.com/u/26906414/cdn/img/ng-webspeech-banner.png)
+![image](http://goo.gl/oYiKJ4)
 
 ## * Tutorial 
 To quickly get started creating a custom component for AngularJS, install the [AngularJS Component Generator](https://github.com/mgcrea/generator-angular-component), execute the following command:
@@ -90,6 +90,130 @@ To define a
 			
 	])
 	
+
+
+
+
+#### 2.3 - Directive Definition
+
+	# Directive definition
+	_app.directive 'jsSpeech', (['jsSpeechFactory', (jsSpeechFactory)->
+		restrict: 'EAC'
+		scope: true
+		replace:true
+		transclude: true
+		require: 'ngModel'
+		template: '' +
+			'<div class="jsSpeechFactory-container">' +
+			'<p ng-bind-html-unsafe="msg"></p>' +
+			'<a class="jsSpeechFactory-btn" ng-click="toggleStartStop()">' +
+			'<img ng-src="{{Speech.icon}}" class="jsSpeechFactory-icon"/></a>' +
+			'<textarea rows="4" class="form-control" ng-model="ngModel"></textarea>' +
+			'</div>'
+		link: (scope, lElement, lAttrs, ngModel) ->
+	])
+
+
+
+
+#### 2.4 - Directive Logic
+
+
+Setup internal variables.
+
+	$scope = scope
+	recognizing = false
+	recognition = new webkitSpeechRecognition()
+	recognition.continuous = true
+	recognition.interimResults = true
+	
+	$scope.myModel = ""
+	$scope.msg = jsSpeechFactory.messages.info_setup
+	$scope.Speech = 
+		icon: jsSpeechFactory.icons.start
+
+
+Handle the start event by the api.
+
+	#Handle start
+	$scope.onstart = (event) ->
+		$scope.$apply(() ->
+			$scope.Speech.icon = jsSpeechFactory.icons.recording
+		)
+		console.log 'onstart', event
+		
+
+Handle the error event on the api.
+	
+	#Handle error
+	$scope.onerror = (event, message) ->
+		console.log 'onerror', event, message
+		switch event.error
+			when "not-allowed"
+				$scope.$apply(() ->
+					$scope.msg = jsSpeechFactory.messages.info_blocked
+				)
+				
+			else
+				console.log event
+			
+Handle the result event on the api.
+		
+	#Handle results
+	$scope.onresult = (event) ->
+		resultIndex = event.resultIndex
+		console.log 'Handle results', event
+		
+		$scope.$apply(() ->
+			$scope.Speech.icon = jsSpeechFactory.icons.recording
+			$scope.msg = 'Speak into the mic...'
+		)
+		
+		i = resultIndex
+		while i < event.results.length
+			result = event.results[i][0]
+			trans = result.transcript
+			$scope.myModel = trans
+			if event.results[i].isFinal
+				console.log trans
+				$scope.myModel = trans
+			++i
+		
+Handle resetting the user interface.		
+
+	#If its the file, set on the model
+	$scope.reset = (event) ->
+		console.log 'reset', event
+		recognizing = false
+		$scope.Speech.icon = jsSpeechFactory.icons.start
+		$scope.msg = jsSpeechFactory.messages.info_setup
+		
+Handle toggling start or stop.
+	
+	#Handle toggling
+	$scope.toggleStartStop = ->
+		if recognizing
+			recognition.stop()
+			$scope.reset()
+		else
+			recognition.start()
+			recognizing = true
+			$scope.myModel = ""
+			$scope.Speech.icon = jsSpeechFactory.icons.blocked
+	
+
+Attach event listeners to the recognition instance.
+		
+		#Attach event listeners
+		recognition.onerror = $scope.onerror
+		recognition.onend = $scope.reset
+		recognition.onresult = $scope.onresult
+		recognition.onstart = $scope.onstart
+
+
+
+
+
 
 
 ## * Usage 

@@ -8,9 +8,9 @@
       var jsSpeechFactory;
       return jsSpeechFactory = {
         icons: {
-          start: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic.png',
-          recording: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic2-animate.gif',
-          blocked: 'https://dl.dropboxusercontent.com/u/26906414/cdn/img/mic-slash.png'
+          start: 'http://goo.gl/dBS39a',
+          recording: 'http://goo.gl/7JLqdm',
+          blocked: 'http://goo.gl/j8MZhD'
         },
         messages: {
           info_speak_now: 'Speak now.',
@@ -34,21 +34,21 @@
         scope: true,
         replace: true,
         transclude: true,
-        template: '<div class="jsSpeechFactory-container"><p ng-bind-html-unsafe="msg"></p><a id="button" class="jsSpeechFactory-btn" ng-click="toggleStartStop()"><img ng-src="{{Speech.icon}}" class="jsSpeechFactory-icon"/></a><textarea id="textarea" rows="4" class="form-control" ng-model="myModel"></textarea></div>',
-        require: 'ngModel',
+        require: '^ngModel',
+        template: '' + '<div class="jsSpeechFactory-container">' + '<p ng-bind-html-unsafe="msg"></p>' + '<a class="jsSpeechFactory-btn" ng-click="toggleStartStop()">' + '<img ng-src="{{icon}}" class="jsSpeechFactory-icon"/></a>' + '<textarea rows="4" class="form-control" ng-model="ngModel"></textarea>' + '</div>',
         link: function (scope, lElement, lAttrs, ngModel) {
           var $scope, recognition, recognizing;
           $scope = scope;
           recognizing = false;
-          recognition = new webkitSpeechRecognition();
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          $scope.myModel = '';
+          recognition = new webkitSpeechRecognition({
+            continuous: true,
+            interimResults: true
+          });
           $scope.msg = jsSpeechFactory.messages.info_setup;
-          $scope.Speech = { icon: jsSpeechFactory.icons.start };
+          $scope.icon = jsSpeechFactory.icons.start;
           $scope.onstart = function (event) {
             $scope.$apply(function () {
-              return $scope.Speech.icon = jsSpeechFactory.icons.recording;
+              return $scope.icon = jsSpeechFactory.icons.recording;
             });
             return console.log('onstart', event);
           };
@@ -59,6 +59,14 @@
               return $scope.$apply(function () {
                 return $scope.msg = jsSpeechFactory.messages.info_blocked;
               });
+            case 'no-speech':
+              return $scope.msg = jsSpeechFactory.messages.info_no_speech;
+            case 'aborted':
+              return $scope.msg = jsSpeechFactory.messages.info_setup;
+            case 'audio-capture':
+              return $scope.msg = jsSpeechFactory.messages.info_no_mic;
+            case 'bad-grammar':
+              return $scope.msg = jsSpeechFactory.messages.info_no_speech;
             default:
               return console.log(event);
             }
@@ -68,7 +76,7 @@
             resultIndex = event.resultIndex;
             console.log('Handle results', event);
             $scope.$apply(function () {
-              $scope.Speech.icon = jsSpeechFactory.icons.recording;
+              $scope.icon = jsSpeechFactory.icons.recording;
               return $scope.msg = 'Speak into the mic...';
             });
             i = resultIndex;
@@ -76,10 +84,10 @@
             while (i < event.results.length) {
               result = event.results[i][0];
               trans = result.transcript;
-              $scope.myModel = trans;
+              $scope.ngModel = trans;
               if (event.results[i].isFinal) {
                 console.log(trans);
-                $scope.myModel = trans;
+                $scope.ngModel = trans;
               }
               _results.push(++i);
             }
@@ -88,7 +96,7 @@
           $scope.reset = function (event) {
             console.log('reset', event);
             recognizing = false;
-            $scope.Speech.icon = jsSpeechFactory.icons.start;
+            $scope.icon = jsSpeechFactory.icons.start;
             return $scope.msg = jsSpeechFactory.messages.info_setup;
           };
           $scope.toggleStartStop = function () {
@@ -98,8 +106,8 @@
             } else {
               recognition.start();
               recognizing = true;
-              $scope.myModel = '';
-              return $scope.Speech.icon = jsSpeechFactory.icons.blocked;
+              $scope.ngModel = '';
+              return $scope.icon = jsSpeechFactory.icons.blocked;
             }
           };
           $scope.reset();
