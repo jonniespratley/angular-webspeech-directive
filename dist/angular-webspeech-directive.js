@@ -16,7 +16,7 @@
           blocked: 'http://goo.gl/vd4AKi'
         },
         messages: {
-          info_speak_now: 'Speak now... or <a href="#" ng-click="abort()">Cancel</a>',
+          info_speak_now: 'Speak now... or <a href="#" ng-click="reset()">Cancel</a>',
           info_stop: 'Proccessing your voice...',
           info_no_speech: 'No Speech was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>.',
           info_no_mic: 'No microphone was found. Ensure that a microphone is installed.',
@@ -40,15 +40,15 @@
   _app.directive('jsSpeech', [
     'jsSpeechFactory',
     function (jsSpeechFactory) {
-      ({
+      return {
         restrict: 'AE',
         replace: true,
         transclude: true,
         require: '^ngModel',
         scope: { ngModel: '=' },
-        template: '<div class="jsSpeechFactory-container">\n<a href="" class="jsSpeechFactory-btn" ng-click="toggleStartStop()">\n<img ng-src="{{speech.icon}}" class="jsSpeechFactory-icon"/></a>\n<input type="text" class="form-control" ng-model="ngModel.value"/>\n<p class="text-muted jsSpeechFactory-hint" ng-bind-html-unsafe="speech.msg"></p>\n</div>',
+        template: '<div class="jsSpeechFactory-container">\n<a href="" class="jsSpeechFactory-btn" ng-click="toggleStartStop()">\n\n  <i class="fa fa-microphone fa-2x" ng-hide="ngModel.recognizing"></i>\n  <i class="fa fa-microphone-slash fa-2x" ng-show="ngModel.recognizing"></i>\n\n</a>\n<input type="text" class="form-control" ng-model="ngModel.value"/>\n<p class="text-muted jsSpeechFactory-hint" ng-bind-html-unsafe="speech.msg"></p>\n</div>',
         link: function (scope, element, attrs, ngModel) {
-          var $scope, init, onerror, onresult, onstart, recognition, recognizing, reset, safeApply, setIcon, setMsg, upgrade;
+          var $scope, init, onresult, onstart, recognition, recognizing, reset, safeApply, setIcon, setMsg, upgrade;
           $scope = scope;
           recognizing = false;
           recognition = null;
@@ -101,19 +101,25 @@
             return setIcon('blocked');
           };
           onstart = function (event) {
+            var onerror;
+            $scope.ngModel.recognizing = true;
             setIcon('recording');
-            return console.log('onstart', event);
-          };
-          onerror = function (event, message) {
-            console.log('onerror', event, message);
-            switch (event.error) {
-            case 'not-allowed':
-              setMsg('info_blocked');
-              break;
-            default:
-              console.log(event);
-            }
-            return setMsg('info_denied');
+            setMsg('info_speak_now');
+            console.log('onstart', event);
+            return onerror = function (event, message) {
+              console.log('onerror', event, message);
+              $scope.ngModel.recognizing = false;
+              switch (event.error) {
+              case 'not-allowed':
+                return setMsg('info_blocked');
+              case 'no-speech':
+                return setMsg('info_no_speech');
+              case 'service-not-allowed':
+                return setMsg('info_denied');
+              default:
+                return console.log(event);
+              }
+            };
           };
           onresult = function (event) {
             var i, result, resultIndex, trans, _results;
@@ -127,11 +133,14 @@
               result = event.results[i][0];
               trans = jsSpeechFactory.capitalize(result.transcript);
               safeApply(function () {
-                return $scope.ngModel.interimResults = trans;
+                $scope.ngModel.interimResults = trans;
+                $scope.ngModel.value = trans;
+                return $scope.ngModel.recognizing = true;
               });
               if (event.results[i].isFinal) {
                 safeApply(function () {
-                  return $scope.ngModel.value = trans;
+                  $scope.ngModel.value = trans;
+                  return $scope.ngModel.recognizing = false;
                 });
               }
               _results.push(++i);
@@ -140,26 +149,26 @@
           };
           reset = function (event) {
             console.log('reset', event);
-            $scope.speech.recognizing = false;
+            $scope.ngModel.recognizing = false;
             setIcon('start');
-            return setMsg('info_setup');
+            setMsg('info_setup');
+            return $scope.abort = function () {
+              return $scope.toggleStartStop();
+            };
           };
-          $scope.abort = function () {
-            return $scope.toggleStartStop();
-          };
-          return $scope.toggleStartStop = function () {
-            if ($scope.speech.recognizing) {
+          $scope.toggleStartStop = function () {
+            if ($scope.ngModel.recognizing) {
               recognition.stop();
               return reset();
             } else {
               recognition.start();
-              $scope.speech.recognizing = true;
+              $scope.ngModel.recognizing = true;
               return setIcon('blocked');
             }
           };
+          return init();
         }
-      });
-      return init();
+      };
     }
   ]);
 }.call(this));

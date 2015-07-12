@@ -27,6 +27,6 @@ app.controller('MainCtrl', function($scope) {
     body: 'Use your voice to do something.'
   };
   //$scope.Speech = Speech.init();
-	$scope.myModel = '';
+	$scope.myModel = {};
 	console.log($scope);
 });

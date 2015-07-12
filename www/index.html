@@ -9,10 +9,16 @@
 	    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
 
 
-    <script src="../bower_components/jquery/jquery.min.js"></script>
+    <!-- Dependencies -->
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
     <script src="../bower_components/angular/angular.min.js"></script>
+    <script src="../bower_components/modernizer/modernizer.js"></script>
+     <link data-require="font-awesome@4.3.0" data-semver="4.3.0" rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+   
+    
+    <!-- Module -->
     <script src="../dist/angular-webspeech-directive.js"></script>
-    <link rel="stylesheet" href="../src/styles.css" />
+    <link rel="stylesheet" href="styles.css" />
     <script src="app.js"></script>
   </head>
 
@@ -46,7 +52,8 @@
       </div>
       <div class="row">
         <div class="col-md-12">
-          <js-speech ng-model="debug"></js-speech>
+          <js-speech ng-model="myModel"></js-speech>
+          <pre>{{myModel | json }}</pre>
         </div>
       </div>
     </div>

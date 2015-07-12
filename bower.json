@@ -2,6 +2,7 @@
   "name": "angular-webspeech-directive",
   "version": "0.0.1",
   "dependencies": {
+    "modernizer": "~2.8.2"
   },
   "devDependencies": {
     "angular-unstable": "latest",
